@@ -13,7 +13,7 @@ _client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 def _extract_sync(skill: BaseSkill, user_input: str) -> dict:
     response = _client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=user_input,
         config=types.GenerateContentConfig(
             tools=[types.Tool(function_declarations=[skill.function_declaration()])],
