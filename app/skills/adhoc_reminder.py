@@ -7,7 +7,7 @@ from app.skills.base import NoOpSkill
 
 class AdHocReminderForm(BaseModel):
     message: str = Field(description="What to remind about")
-    datetime: str = Field(description="When to trigger the reminder, in ISO 8601 format")
+    datetime: str = Field(description="When to trigger the reminder, in ISO 8601 format (e.g. 2024-05-10T10:00:00). Only populate this field if the user explicitly states both a date AND a time. If the time is missing or ambiguous, omit this field entirely — do not assume or infer a default time.")
 
     @field_validator("message")
     @classmethod
