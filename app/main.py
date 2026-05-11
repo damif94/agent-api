@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 import app.registry as registry
 from app.llm import extract_fields
-from app.models import FieldError, InvokeRequest, InvokeResponse, SkillField, SkillInfo
+from app.models import FieldError, InvokeRequest, InvokeResponse, SkillField, SkillResponseItem
 from app.skills.base import field_to_gemini_schema
 
 
@@ -20,8 +20,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Agent API", version="0.1.0", lifespan=lifespan)
 
 
-@app.get("/skills", response_model=list[SkillInfo])
-def list_skills() -> list[SkillInfo]:
+@app.get("/skills", response_model=list[SkillResponseItem])
+def list_skills() -> list[SkillResponseItem]:
     result = []
     for skill in registry.all_skills():
         required = {
@@ -37,7 +37,7 @@ def list_skills() -> list[SkillInfo]:
             )
             for name, field in skill.form_model.model_fields.items()
         ]
-        result.append(SkillInfo(name=skill.name, description=skill.description, fields=fields))
+        result.append(SkillResponseItem(name=skill.name, description=skill.description, fields=fields))
     return result
 
 
@@ -59,4 +59,4 @@ async def invoke_skill(skill_name: str, body: InvokeRequest) -> InvokeResponse:
         return InvokeResponse(status="invalid", errors=errors, extracted=extracted)
 
     result = await skill.execute(form)
-    return InvokeResponse(status="complete", result=result)
+    return InvokeResponse(status="complete", result=result, extracted=extracted)

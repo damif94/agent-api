@@ -27,7 +27,7 @@ class SkillField(BaseModel):
     type: str
 
 
-class SkillInfo(BaseModel):
+class SkillResponseItem(BaseModel):
     name: str
     description: str
     fields: list[SkillField]
