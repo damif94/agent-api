@@ -58,3 +58,8 @@ class BaseSkill(ABC):
 
     @abstractmethod
     async def execute(self, form: BaseModel) -> dict[str, Any]: ...
+
+
+class NoOpSkill(BaseSkill):
+    async def execute(self, form: BaseModel) -> dict[str, Any]:
+        return {}

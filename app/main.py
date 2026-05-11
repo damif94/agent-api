@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 import app.registry as registry
 from app.llm import extract_fields
-from app.models import FieldError, InvokeRequest, InvokeResponse, SkillField, SkillResponseItem
+from app.models import FieldError, InvokeRequest, InvokeResponse, InvokeStatus, SkillField, SkillResponseItem
 from app.skills.base import field_to_gemini_schema
 
 
@@ -56,7 +56,7 @@ async def invoke_skill(skill_name: str, body: InvokeRequest) -> InvokeResponse:
             FieldError(field=str(e["loc"][0]), message=e["msg"])
             for e in exc.errors()
         ]
-        return InvokeResponse(status="invalid", errors=errors, extracted=extracted)
+        return InvokeResponse(status=InvokeStatus.invalid, errors=errors, extracted=extracted)
 
     result = await skill.execute(form)
-    return InvokeResponse(status="complete", result=result, extracted=extracted)
+    return InvokeResponse(status=InvokeStatus.complete, result=result, extracted=extracted)

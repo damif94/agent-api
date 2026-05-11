@@ -1,8 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel
+
+
+class InvokeStatus(str, Enum):
+    complete = "complete"
+    partial = "partial"
+    invalid = "invalid"
 
 
 class InvokeRequest(BaseModel):
@@ -15,7 +22,7 @@ class FieldError(BaseModel):
 
 
 class InvokeResponse(BaseModel):
-    status: Literal["complete", "invalid"]
+    status: InvokeStatus
     result: dict[str, Any] | None = None
     errors: list[FieldError] | None = None
     extracted: dict[str, Any] | None = None
