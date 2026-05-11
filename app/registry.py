@@ -4,7 +4,7 @@ import importlib
 import pkgutil
 
 import app.skills as skills_pkg
-from app.skills.base import BaseSkill
+from app.skills.base import BaseSkill, NoOpSkill
 
 _registry: dict[str, BaseSkill] = {}
 
@@ -19,6 +19,7 @@ def load() -> None:
                 isinstance(attr, type)
                 and issubclass(attr, BaseSkill)
                 and attr is not BaseSkill
+                and attr is not NoOpSkill
             ):
                 instance = attr()
                 _registry[instance.name] = instance
