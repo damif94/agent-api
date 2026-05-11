@@ -33,7 +33,7 @@ def list_skills() -> list[SkillInfo]:
             SkillField(
                 name=name,
                 required=name in required,
-                type=field_to_gemini_schema(field).type,
+                type=field_to_gemini_schema(field).get("type", "string"),
             )
             for name, field in skill.form_model.model_fields.items()
         ]

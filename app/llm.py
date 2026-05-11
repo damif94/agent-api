@@ -16,7 +16,7 @@ def _extract_sync(skill: BaseSkill, user_input: str) -> dict:
         model="gemini-2.0-flash",
         contents=user_input,
         config=types.GenerateContentConfig(
-            tools=[types.Tool(function_declarations=[skill.function_declaration().model_dump(exclude_none=True)])],
+            tools=[types.Tool(function_declarations=[skill.function_declaration()])],
             tool_config=types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(mode="ANY")
             ),

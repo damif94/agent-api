@@ -9,25 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 
-class GeminiPropertySchema(BaseModel):
-    type: str
-    description: str = ""
-    enum: list[str] | None = None
-
-
-class GeminiFunctionParameters(BaseModel):
-    type: str = "object"
-    properties: dict[str, GeminiPropertySchema]
-    required: list[str] = []
-
-
-class GeminiFunctionDeclaration(BaseModel):
-    name: str
-    description: str
-    parameters: GeminiFunctionParameters
-
-
-def field_to_gemini_schema(field: FieldInfo) -> GeminiPropertySchema:
+def field_to_gemini_schema(field: FieldInfo) -> dict:
     annotation = field.annotation
     description = field.description or ""
 
@@ -40,14 +22,16 @@ def field_to_gemini_schema(field: FieldInfo) -> GeminiPropertySchema:
 
     # Enum → string with values list
     if isinstance(annotation, type) and issubclass(annotation, Enum):
-        return GeminiPropertySchema(
-            type="string",
-            description=description,
-            enum=[e.value for e in annotation],
-        )
+        schema: dict[str, Any] = {"type": "string", "enum": [e.value for e in annotation]}
+        if description:
+            schema["description"] = description
+        return schema
 
     type_map = {str: "string", int: "integer", float: "number", bool: "boolean"}
-    return GeminiPropertySchema(type=type_map.get(annotation, "string"), description=description)
+    schema = {"type": type_map.get(annotation, "string")}
+    if description:
+        schema["description"] = description
+    return schema
 
 
 class BaseSkill(ABC):
@@ -56,18 +40,21 @@ class BaseSkill(ABC):
     form_model: ClassVar[Type[BaseModel]]
 
     @classmethod
-    def function_declaration(cls) -> GeminiFunctionDeclaration:
+    def function_declaration(cls) -> dict:
         """Gemini function declaration with all fields optional (partial extraction)."""
-        return GeminiFunctionDeclaration(
-            name=cls.name,
-            description=cls.description,
-            parameters=GeminiFunctionParameters(
-                properties={
-                    name: field_to_gemini_schema(field)
-                    for name, field in cls.form_model.model_fields.items()
-                }
-            ),
-        )
+        props = {
+            name: field_to_gemini_schema(field)
+            for name, field in cls.form_model.model_fields.items()
+        }
+        return {
+            "name": cls.name,
+            "description": cls.description,
+            "parameters": {
+                "type": "object",
+                "properties": props,
+                "required": [],
+            },
+        }
 
     @abstractmethod
     async def execute(self, form: BaseModel) -> dict[str, Any]: ...
