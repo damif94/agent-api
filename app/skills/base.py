@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 
-def field_to_gemini_schema(field: FieldInfo) -> dict:
+def field_to_schema(field: FieldInfo) -> dict:
     annotation = field.annotation
     description = field.description or ""
 
@@ -38,23 +38,6 @@ class BaseSkill(ABC):
     name: ClassVar[str]
     description: ClassVar[str]
     form_model: ClassVar[Type[BaseModel]]
-
-    @classmethod
-    def function_declaration(cls) -> dict:
-        """Gemini function declaration with all fields optional (partial extraction)."""
-        props = {
-            name: field_to_gemini_schema(field)
-            for name, field in cls.form_model.model_fields.items()
-        }
-        return {
-            "name": cls.name,
-            "description": cls.description,
-            "parameters": {
-                "type": "object",
-                "properties": props,
-                "required": [],
-            },
-        }
 
     @abstractmethod
     async def execute(self, form: BaseModel) -> dict[str, Any]: ...

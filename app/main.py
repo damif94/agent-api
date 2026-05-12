@@ -8,7 +8,7 @@ from pydantic import ValidationError
 import app.registry as registry
 from app.llm import extract_fields
 from app.models import FieldError, InvokeRequest, InvokeResponse, InvokeStatus, SkillField, SkillResponseItem
-from app.skills.base import field_to_gemini_schema
+from app.skills.base import field_to_schema
 
 
 @asynccontextmanager
@@ -33,7 +33,7 @@ def list_skills() -> list[SkillResponseItem]:
             SkillField(
                 name=name,
                 required=name in required,
-                type=field_to_gemini_schema(field).get("type", "string"),
+                type=field_to_schema(field).get("type", "string"),
             )
             for name, field in skill.form_model.model_fields.items()
         ]
